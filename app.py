@@ -17,15 +17,11 @@ def slack_interactivity():
         print(request.headers)
         print("-------Request Form -------")
         print(request.form)
-        # request_body = request.get_data().decode()
-        request_body = request.form.to_dict()
-        print(request_body)
+        request_body = json.loads(request.form.to_dict().get("payload"))
         if request_body and request_body.get("actions"):
-            action_required = False
-            for action in request_body.get("actions"):
-                if action.get("action_id") == "jit-feedback-submit":
-                    action_required = True
-            if action_required:
+            action_info = request_body.get("actions")[0]
+            if action_info.get("action_id") == "jit-feedback-submit":
+                print(request_body)
                 response_url = request_body.get("response_url")
                 values = request_body.get("state", {}).get("values")
                 user_response = {}
