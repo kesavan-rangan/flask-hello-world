@@ -3,12 +3,22 @@ from flask import request
 import requests
 import traceback
 import json
+from azure.storage.blob import BlobClient
+import os
 
 app = Flask(__name__)
+SAS_URL = os.getenv("AZURE_SAS_URL", "")
 
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
+
+
+def _upload_feedback_json(uuid, json_string):
+    sas_url_blob = SAS_URL.format(blob_name=uuid)
+    blob_client = BlobClient.from_blob_url(sas_url_blob)
+    blob_client.upload_blob(json_string, overwrite=True)
+
 
 @app.route('/interactive', methods=['POST'])
 def slack_interactivity():
@@ -21,10 +31,11 @@ def slack_interactivity():
         if request_body and request_body.get("actions"):
             action_info = request_body.get("actions")[0]
             if action_info.get("action_id") == "jit-feedback-submit":
+                jit_ticket_id = action_info.get("value")
                 print(request_body)
                 response_url = request_body.get("response_url")
                 values = request_body.get("state", {}).get("values")
-                user_response = {}
+                user_response = {"jit_ticket_id": jit_ticket_id}
                 if values:
                     for key, value in values.items():
                         for sub_key, sub_value in value.items():
@@ -41,6 +52,7 @@ def slack_interactivity():
                     "text": "Thanks for your valuable feedback!"
                 }
                 r = requests.post(response_url, data=json.dumps(slack_response))
+                _upload_feedback_json(jit_ticket_id, json.dumps(user_response))
                 if r.status_code == 200:
                     print("Updated the message")
     except Exception as e:
