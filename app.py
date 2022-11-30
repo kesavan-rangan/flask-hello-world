@@ -15,7 +15,7 @@ def hello_world():
 
 
 def _upload_feedback_json(uuid, json_string):
-    sas_url_blob = SAS_URL.format(blob_name=uuid)
+    sas_url_blob = SAS_URL.format(blob_name=f"feedback_{uuid}")
     blob_client = BlobClient.from_blob_url(sas_url_blob)
     blob_client.upload_blob(json_string, overwrite=True)
 
