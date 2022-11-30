@@ -17,7 +17,8 @@ def slack_interactivity():
         print(request.headers)
         print("-------Request Form -------")
         print(request.form)
-        request_body = request.get_data().decode()
+        # request_body = request.get_data().decode()
+        request_body = request.form.to_dict()
         print(request_body)
         if request_body and request_body.get("actions"):
             action_required = False
