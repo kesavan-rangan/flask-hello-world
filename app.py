@@ -13,17 +13,12 @@ def hello_world():
 @app.route('/interactive', methods=['POST'])
 def slack_interactivity():
     try:
-        print("-------Request ARGS -------")
-        print(request.args)
         print("-------Request Headers -------")
         print(request.headers)
         print("-------Request Form -------")
         print(request.form)
         request_body = request.get_data().decode()
         print(request_body)
-        print("-------Request JSON body -------")
-        print(request.get_json())
-        print("-------Done-------")
         if request_body and request_body.get("actions"):
             action_required = False
             for action in request_body.get("actions"):
@@ -40,7 +35,6 @@ def slack_interactivity():
                                 user_response[sub_key] = sub_value.get("selected_option", {}).get("value")
                             elif sub_value.get("type") == "plain_text_input":
                                 user_response[sub_key] = sub_value.get("value")
-
                 user_response["user"] = request_body.get("user", {})
                 user_response["message_timestamp"] = request_body.get("container", {}).get("message_ts")
                 user_response["trigger_id"] = request_body.get("trigger_id")
